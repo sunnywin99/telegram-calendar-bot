@@ -22,10 +22,20 @@ chose "no paid AI API" over an AI-parsing approach when this was scoped.
 - `gh` (GitHub CLI) is already authenticated on this machine under account
   `sunnywin99` — same account as [[project_trade_calc]].
 - Deploy target: **Render free Web Service** (not a Claude Artifact — this is
-  a Python backend, Artifacts only serve static HTML/JS). Kept alive on the
-  free tier via an external UptimeRobot ping hitting the Flask health-check
-  route every 5 minutes (user explicitly accepted this tradeoff over paying
-  ~$7/mo for a real Background Worker).
+  a Python backend, Artifacts only serve static HTML/JS). **Deployed and
+  live as of 2026-08-11**: `https://telegram-calendar-bot-tq0r.onrender.com`
+  (service id `srv-d9tb3ap42hec73fpia3g`, region Oregon). Kept alive on the
+  free tier via an UptimeRobot HTTP(s) monitor hitting the Flask
+  health-check route (`/`) every 5 minutes (user explicitly accepted this
+  tradeoff over paying ~$7/mo for a real Background Worker). UptimeRobot's
+  real dashboard lives at `dashboard.uptimerobot.com/monitors` — the
+  more-guessable `app.uptimerobot.com` kept redirect-looping to a pricing
+  upsell page for both Claude and the user; that other domain is a dead end,
+  don't retry it. **`dashboard.uptimerobot.com` also would not load at all
+  under claude-in-chrome** (stuck indefinitely on a "Checking browser
+  compatibility" step, screenshot/find tools timed out) — the user had to
+  create the monitor manually themselves; don't assume browser automation
+  can drive that specific site.
 - Development happens on this device, which the user calls 第二台筆電
   ("second laptop") — this machine did **not** have Node.js installed, only
   Python 3.14, which is why this project is Python rather than Node despite
@@ -68,6 +78,22 @@ Telegram long polling, no webhook.
 
 `credentials.json` (the downloaded OAuth client JSON) and `.env` are
 git-ignored — they only ever exist locally on 第二台筆電, never in the repo.
+
+**Render deploy form gotcha:** the "New Web Service" form starts with one
+pre-existing blank environment-variable row already present. Pasting all six
+vars via the "Add from .env" bulk box appends rows after that blank one —
+if it's not deleted, the form fails validation ("Required") on submit
+silently pointing at the empty key field. Check for and delete any empty
+`NAME_OF_VARIABLE` row before clicking Deploy.
+
+**Free-tier cold starts are real, not just a README caveat:** right after
+first deploying (2026-08-11), the ~20-minute gap between "deploy finished"
+and "UptimeRobot monitor created" was enough idle time (no *inbound* HTTP
+traffic — the bot's own outbound Telegram polling doesn't count) for Render
+to spin the instance down. UptimeRobot's first check hit a 502 during the
+~30s wake-up window and flagged the monitor Down before self-recovering.
+Expect this on any fresh deploy that isn't immediately followed by setting
+up the keep-alive ping — not a sign of a real problem.
 
 ## Google Cloud project
 
