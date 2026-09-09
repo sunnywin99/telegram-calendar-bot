@@ -124,6 +124,27 @@ Render 免費 Web Service 閒置 15 分鐘沒有 HTTP 請求會自動休眠，�
 
 ---
 
+## 自架伺服器（第三台桌電）常駐執行
+
+不想依賴 Render 免費方案的話，可以把整個資料夾複製到常開機的電腦上，用 Windows
+的工作排程器讓它開機自動啟動、當掉自動重開：
+
+1. 複製 `.env.example` 改名成 `.env`，把步驟 4 表格裡那些值填進去（不要複製到別台
+   電腦時漏掉 `.env`，也不要把它 push 上 GitHub）。
+2. 如果同一台伺服器上還有跑其他 telegram bot，確認每個 bot 的 `.env` 裡 `PORT`
+   都不一樣（這個埠號只是本機健康檢查用，不用對外開放，也不用設定路由器）。
+3. 建好 `venv` 並 `pip install -r requirements.txt`（跟本機開發時的步驟一樣）。
+4. 用系統管理員身分開 PowerShell，執行 `.\install_task.ps1` 註冊排程工作。
+5. 執行 `Start-ScheduledTask -TaskName 'TelegramCalendarBot'` 立即啟動一次，
+   到 Telegram 傳訊息測試；`bot.log` 可以看執行記錄。
+6. **確認沒問題後，記得到 Render 把這個服務關掉或刪除**——同一組
+   `TELEGRAM_BOT_TOKEN` 不能兩邊同時長輪詢，不然兩邊都會收到 409 衝突錯誤、
+   訊息時有時無。
+
+移除排程工作：`Unregister-ScheduledTask -TaskName "TelegramCalendarBot" -Confirm:$false`
+
+---
+
 ## 疑難排解
 
 - **機器人完全沒反應**：先確認 Render 的 Logs 頁籤有沒有錯誤訊息；再確認
@@ -131,6 +152,7 @@ Render 免費 Web Service 閒置 15 分鐘沒有 HTTP 請求會自動休眠，�
   機器人「已讀不回」（其實是回了「沒有權限」，但只回給你以外的人才看得到）。
 - **建立日曆事件失敗**：多半是 `GOOGLE_REFRESH_TOKEN` 這組值失效或打錯，
   重新執行一次 `get_refresh_token.py` 取得新的一組再更新 Render 環境變數。
-- **本機測試**：把 `.env` 裡的變數改成用 PowerShell `$env:` 設定後，
-  直接 `.\venv\Scripts\python bot.py` 也能在本機跑（記得先設好 `credentials.json`
+- **本機測試**：把 `.env.example` 複製成 `.env` 填好值後，
+  直接 `.\venv\Scripts\python bot.py` 就能在本機跑（記得先設好 `credentials.json`
   跑過一次 `get_refresh_token.py`）。
+- **自架伺服器常駐執行**：見上面「自架伺服器（第三台桌電）常駐執行」。

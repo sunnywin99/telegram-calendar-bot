@@ -1,19 +1,20 @@
 """
 主程式：Telegram 長輪詢 + Google 日曆建立事件 + Render 免費方案保活用的健康檢查網址。
 
-環境變數（Render 的 Environment 頁籤設定）：
+環境變數（Render 的 Environment 頁籤設定，或本機/自架伺服器同資料夾的 .env 檔，見 .env.example）：
     TELEGRAM_BOT_TOKEN        跟 @BotFather 申請的 token
     ALLOWED_TELEGRAM_USER_ID  只允許這個 Telegram user id 的訊息建立行程（防止別人亂用）
     GOOGLE_CLIENT_ID          get_refresh_token.py 印出來的值
     GOOGLE_CLIENT_SECRET      get_refresh_token.py 印出來的值
     GOOGLE_REFRESH_TOKEN      get_refresh_token.py 印出來的值
     GOOGLE_CALENDAR_ID        要寫入哪個日曆，預設 "primary"（你自己的主日曆）
-    PORT                      Render 會自動設定，本機測試預設 8080
+    PORT                      Render 會自動設定；自架伺服器同時跑多個 bot 時要各自設不同埠號
 """
 import logging
 import os
 import threading
 
+from dotenv import load_dotenv
 from flask import Flask
 from google.auth.transport.requests import Request as GoogleAuthRequest
 from google.oauth2.credentials import Credentials
@@ -22,6 +23,8 @@ from telegram import Update
 from telegram.ext import Application, ContextTypes, MessageHandler, filters
 
 from parser import TIMEZONE, parse_message
+
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
