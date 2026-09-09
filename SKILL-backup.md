@@ -36,6 +36,22 @@ chose "no paid AI API" over an AI-parsing approach when this was scoped.
   compatibility" step, screenshot/find tools timed out) — the user had to
   create the monitor manually themselves; don't assume browser automation
   can drive that specific site.
+- **2026-09-09: self-hosting support added.** Render's free 750hr/month pool
+  ran out (see [[project_third_desktop_server_plan]]), so the user is
+  migrating the always-on Telegram bots to a self-hosted **third desktop PC**
+  kept running at home, instead of another cloud free tier. `bot.py` now
+  calls `load_dotenv()` (added `python-dotenv` to `requirements.txt`) so a
+  local `.env` file (copy `.env.example`) works alongside Render's existing
+  dashboard env vars — no behavior change on Render itself. New files
+  `run_bot.ps1` (wrapper that logs to `bot.log`) and `install_task.ps1`
+  (registers a Windows Scheduled Task running as `SYSTEM`, trigger
+  `AtStartup`, auto-restart on failure — no login session or third-party
+  service like NSSM needed) support running it as a persistent service on
+  that machine. **Migration is not complete yet** — Render is still the live
+  production target as of this writing; don't assume the bot has actually
+  moved until told the third desktop is confirmed running and Render's
+  service has been stopped (same-token long-polling conflict risk otherwise,
+  see README's new self-host section).
 - Development happens on this device, which the user calls 第二台筆電
   ("second laptop") — this machine did **not** have Node.js installed, only
   Python 3.14, which is why this project is Python rather than Node despite
