@@ -40,6 +40,14 @@ AI API" when this was scoped.
   https://claude.ai/artifact/PW4mUhAfjY6CTBJHg41o5k —
   authoritative; this file is an orientation summary.
 
+**Auto-deploy can silently stop.** On 2026-10-26 pushes to `master` stopped
+triggering Cloudflare builds; Worker → 設定 → 建置 showed 「此專案已與您的 Git
+帳戶中斷連線」. The user fixed it by re-granting the repo in GitHub's
+"Cloudflare Workers and Pages" app settings (the 管理 button). In the 部署
+tab, GitHub-triggered builds show 「建置」 + `master` tags; secret edits show
+「儀表板」. If a push doesn't produce a 建置 row within a few minutes, check
+that banner first.
+
 **Always re-read `src/` and run `git log --oneline` before making changes.**
 
 ## Architecture
