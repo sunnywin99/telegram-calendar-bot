@@ -1,0 +1,13 @@
+name = "telegram-calendar-bot"
+main = "src/index.js"
+compatibility_date = "2026-09-15"
+workers_dev = true
+
+[vars]
+# 只處理這個 Telegram user id 的訊息（不是機密；Bot Token 和 Google 憑證放在 Cloudflare 後台的秘密）
+ALLOWED_TELEGRAM_USER_ID = "8735906224"
+# 要寫入哪個日曆，primary = 你自己的主日曆
+GOOGLE_CALENDAR_ID = "primary"
+
+[observability]
+enabled = true
