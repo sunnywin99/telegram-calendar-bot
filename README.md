@@ -97,6 +97,10 @@ Worker 頁面的「部署」看有沒有成功，「Observability」看執行記
 
 ## 疑難排解
 
+- **推上 GitHub 了，但 Cloudflare 沒有自動部署**：到 Worker 的「設定 → 建置」，看有沒有
+  「此專案已與您的 Git 帳戶中斷連線」的提示。有的話按「管理」，在 GitHub 的 Cloudflare 授權設定把這個
+  repo 加回允許清單（或選 All repositories），存檔後回來確認提示消失；之後的 push 就會自動部署。
+  「部署」分頁裡，從 GitHub 自動建置的那幾筆會標示「建置」和 `master`。
 - **機器人完全沒反應**：重新打開一次 `/setup` 看它說什麼。
   `ALLOWED_TELEGRAM_USER_ID` 打錯的話，機器人會回「沒有權限」。
 - **行程時間不對**：先對照上面「輸入格式」，特別是沒寫上午／下午時，數字會當 24 小時制。
