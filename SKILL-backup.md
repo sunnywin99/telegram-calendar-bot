@@ -36,7 +36,8 @@ AI API" when this was scoped.
   same pattern as the sibling bots. Python files (`bot.py`, `parser.py`)
   were removed; they're in git history. Render/UptimeRobot no longer used.
 - **Development: Claude Code cloud sessions.**
-- Changelog: the telegram-calendar-bot-history repo and its Artifact —
+- Changelog: the telegram-calendar-bot-history repo and its Artifact
+  https://claude.ai/artifact/PW4mUhAfjY6CTBJHg41o5k —
   authoritative; this file is an orientation summary.
 
 **Always re-read `src/` and run `git log --oneline` before making changes.**
@@ -124,5 +125,5 @@ step at a time.
       fast-forward `master`; Cloudflare auto-deploys.
    3. Add an `ENTRIES` item to telegram-calendar-bot-history's
       `index.html` (plain Traditional Chinese), commit/push, republish its
-      Artifact.
+      Artifact: https://claude.ai/artifact/PW4mUhAfjY6CTBJHg41o5k
    4. Update this `SKILL-backup.md` (commit + push).
