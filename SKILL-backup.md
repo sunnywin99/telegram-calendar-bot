@@ -96,8 +96,21 @@ Project id `telegram-calendar-bot-504106`, OAuth client
 `calendar.events`. The consent screen is already in **"實際運作中"
 (production)**, so refresh tokens don't expire after 7 days. The client
 secret can't be re-downloaded after the creation dialog closes; if lost,
-create a new OAuth client. To get a new refresh token, run
-`get_refresh_token.py` on a computer with Python and `credentials.json`.
+create a new OAuth client.
+
+**Browser re-authorization (added 2026-10-26, `src/oauth.js`)**: the user
+had no copy of the calendar bot's own Google values (and pasting the other
+bots' Sheets-only credentials fails with "insufficient authentication
+scopes"). So the Worker has `GET /auth` → Google consent (calendar.events,
+`access_type=offline`, `prompt=consent`, state cookie) → `GET
+/oauth/callback`, which exchanges the code and **only displays** the
+refresh token for the user to paste into the `GOOGLE_REFRESH_TOKEN` secret
+(never stored automatically, so a stranger opening /auth only gets a token
+for their own account). It needs a **"網頁應用程式" (Web application)**
+OAuth client with redirect URI
+`https://telegram-calendar-bot.sunnywin99.workers.dev/oauth/callback`; its
+ID/secret become `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`.
+`get_refresh_token.py` (desktop client + Python) still works too.
 
 ## Telegram bot identity
 

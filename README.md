@@ -72,23 +72,24 @@ Worker 頁面的「部署」看有沒有成功，「Observability」看執行記
 改到 `src/parser.js` 時，`npm test` 一定要全部通過；如果是刻意改變解析行為，
 要一起更新 `test/parser-golden.json` 裡受影響的那幾筆。
 
-## Google 授權失效時：重新申請 refresh token
+## Google 授權：用瀏覽器重新申請 refresh token
 
-`/setup` 顯示「Google 授權失敗：Token has been expired or revoked」之類的訊息，
-就要重新申請一組 refresh token。需要一台有 Python 的電腦：
+`/setup` 顯示「Google 授權失敗」、「insufficient authentication scopes」，或找不到原本那組值時，
+用瀏覽器重新授權就好，不需要 Python、也不需要特定電腦：
 
-1. 到 [Google Cloud Console](https://console.cloud.google.com/) 原本的專案，
-   「API 和服務」→「憑證」，下載這個 bot 的 OAuth 用戶端（電腦版應用程式）JSON，
-   改名成 `credentials.json` 放在 repo 資料夾。
-2. 建好 venv 並 `pip install -r requirements.txt`，執行：
+1. **建一組「網頁應用程式」OAuth 用戶端（只要做一次）**：到 [Google Cloud Console](https://console.cloud.google.com/)
+   專案 `telegram-calendar-bot-504106` →「API 和服務」→「憑證」→「建立憑證」→「OAuth 用戶端 ID」，
+   應用程式類型選 **網頁應用程式**，「已授權的重新導向 URI」新增
+   `https://telegram-calendar-bot.sunnywin99.workers.dev/oauth/callback`，按「建立」。
+   彈出視窗裡的**用戶端 ID**和**用戶端密碼**要馬上抄下來（之後看不到密碼）。
+2. 把這兩個值更新到 Cloudflare 的秘密 `GOOGLE_CLIENT_ID`、`GOOGLE_CLIENT_SECRET`，部署。
+3. 打開 `https://telegram-calendar-bot.sunnywin99.workers.dev/auth`，選 Google 帳號，
+   看到「Google 尚未驗證這個應用程式」就按「進階」→「前往」，日曆權限要打勾，按「繼續」。
+4. 頁面會顯示新的 refresh token，按「複製」，貼到 Cloudflare 的秘密 `GOOGLE_REFRESH_TOKEN`，部署。
+5. 再打開一次 `/setup` 確認。
 
-   ```powershell
-   .\venv\Scripts\python get_refresh_token.py
-   ```
-
-   瀏覽器會打開，選 Google 帳號並同意。
-3. 把印出來的 `GOOGLE_REFRESH_TOKEN`（以及 CLIENT_ID／CLIENT_SECRET，如果有變）更新到 Cloudflare，
-   再打開一次 `/setup`。
+注意：三個值必須來自同一組 OAuth 用戶端；其他機器人的 Google 資料只有試算表權限，不能拿來用。
+`get_refresh_token.py`（電腦版應用程式用戶端 + Python）也還能用，只是瀏覽器的方式比較簡單。
 
 **避免 7 天就失效**：Google Cloud 的 OAuth 同意畫面如果還是「測試中」，refresh token 7 天後就會失效。
 到「API 和服務」→「OAuth 同意畫面」（或「目標對象」）按 **發布應用程式**，改成「實際運作中」。

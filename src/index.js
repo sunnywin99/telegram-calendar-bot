@@ -15,7 +15,9 @@
  *
  * 第一次部署、填好上面的值之後，打開 https://<worker 網址>/setup，
  * 會逐項檢查設定，並向 Telegram 註冊 webhook。
+ * 沒有 GOOGLE_REFRESH_TOKEN 或它失效時，打開 https://<worker 網址>/auth 用瀏覽器重新授權（見 src/oauth.js）。
  */
+import { authCallback, authStart } from "./oauth.js";
 import { isoDate, isoDateTime, parseMessage, whenText } from "./parser.js";
 
 const USAGE_TEXT =
@@ -133,6 +135,9 @@ async function handleUpdate(update, env) {
 
 async function setup(url, env) {
   const missing = REQUIRED_SECRETS.filter((k) => !env[k]);
+  if (missing.length === 1 && missing[0] === "GOOGLE_REFRESH_TOKEN") {
+    return `還沒設定 GOOGLE_REFRESH_TOKEN。請打開 ${url.origin}/auth 用瀏覽器授權 Google 日曆，照頁面上的說明把拿到的值貼進 Cloudflare。`;
+  }
   if (missing.length) {
     return `還沒設定：${missing.join("、")}\n請到 Cloudflare 後台這個 Worker 的「設定 → 變數和機密」新增（勾選「秘密」），存檔後再打開這個網址一次。`;
   }
@@ -144,7 +149,11 @@ async function setup(url, env) {
     const accessToken = await googleAccessToken(env);
     await calendarRequest(env, accessToken, `/events?maxResults=1&timeMin=${encodeURIComponent(new Date().toISOString())}`);
   } catch (err) {
-    return `${err.message}\n請確認 GOOGLE_CLIENT_ID／GOOGLE_CLIENT_SECRET／GOOGLE_REFRESH_TOKEN 有沒有貼錯。`;
+    return (
+      `${err.message}\n請確認 GOOGLE_CLIENT_ID／GOOGLE_CLIENT_SECRET／GOOGLE_REFRESH_TOKEN 是同一組、而且是日曆專用的` +
+      `（其他機器人的那組只有試算表權限，會出現 insufficient authentication scopes）。\n` +
+      `找不到原本那組的話，打開 ${url.origin}/auth 用瀏覽器重新授權。`
+    );
   }
 
   const hook = `${url.origin}/telegram`;
@@ -182,6 +191,8 @@ export default {
     }
 
     if (url.pathname === "/setup") return textResponse(await setup(url, env));
+    if (url.pathname === "/auth") return authStart(url, env);
+    if (url.pathname === "/oauth/callback") return authCallback(url, request, env);
 
     return textResponse("telegram-calendar-bot is running");
   },
